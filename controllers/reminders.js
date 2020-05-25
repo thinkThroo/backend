@@ -1,6 +1,7 @@
 const Project = require("../models/project");
-var CronJob = require('cron').CronJob;
+var cron = require('node-cron');
 var dateHelpers = require("../utils/date");
+var tzHelpers = require("../utils/node-cron-offset");
 
 var job = null;
 
@@ -41,14 +42,17 @@ function handleReminders(remindersArray, ws, message) {
         //     job.start();
         //     console.log("message", message);
         // })
-        console.log("registering manaul trigger of cron job--message::", message);
-        let cronString = `6 * * * * *`;
-        job = new CronJob(cronString, function () {
-            console.log('You will see this message for test');
-            ws.send(`sending cron job data`);
-        }, null, true, 'Asia/Kolkata');
+        console.log("registering manaul trigger of cron job--message::", message, "getTZLabel.getTZLabel(-330)", tzHelpers.getTZLabel(-330));
+        let timezone = tzHelpers.getTZLabel(-330)
+        job = cron.schedule('* 57 9 25 5 *', () =>  {
+            console.log('scheduled task on * 30 9 25 5 *--> need to make this dynamic');
+            ws.send(`sending cron job data based`);
+          }, {
+            scheduled: false,
+            timezone
+          });
+           
         job.start();
-        console.log("message", message);
     }
 }
 
