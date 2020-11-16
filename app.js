@@ -10,6 +10,7 @@ var usersRouter = require('./routes/user');
 var taskRouter = require('./routes/task');
 var projectRouter = require('./routes/project');
 var reminders = require('./routes/reminders');
+var wikiRouter = require("./routes/wiki");
 
 //Set up mongoose connection
 var mongoose = require('mongoose');
@@ -57,6 +58,7 @@ app.use('/api/user', usersRouter);
 app.use('/api/task', taskRouter);
 app.use('/api/project', projectRouter);
 app.use('/api/reminders', reminders);
+app.use('/api/workspace', wikiRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

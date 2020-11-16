@@ -19,9 +19,9 @@ exports.user_create_post = function (req, res) {
     const {
         email,
         password,
-        isNew
+        offsetForTz
     } = req.body;
-    const user = new User({ email, password, isNew });
+    const user = new User({ email, password, offsetForTz });
     if (!email || !password) {
         failureRes.msg = responseInfo.epMissing
         res.status(500).json(failureRes);
@@ -39,10 +39,10 @@ exports.user_create_post = function (req, res) {
                 // Issue token
                 const payload = { email };
                 const token = jwt.sign(payload, secret, {
-                  expiresIn: '8h'
+                  expiresIn: '36h'
                 });
                 successRes.msg = "Successfully registered.";
-                res.status(200).json({...successRes, token, user_id: user._id});
+                res.status(200).json({...successRes, token, user_id: user._id, offsetForTz: user.offsetForTz});
             }
         });
     }
@@ -75,13 +75,13 @@ exports.user_login = function(req, res) {
           // Issue token
           const payload = { email };
           const token = jwt.sign(payload, secret, {
-            expiresIn: '8h'
+            expiresIn: '36h'
           });
           successRes.msg = "Successfully logged-in.";
           // console.log("user object at the time of login:", user);
           res
             // .cookie('token', token, { httpOnly: false })
-            .json({...successRes, token, user_id: user._id});
+            .json({...successRes, token, user_id: user._id, offsetForTz: user.offsetForTz});
         }
       });
     }

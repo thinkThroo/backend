@@ -15,6 +15,8 @@ var ProjectSchema = new Schema({
     // fresh
     id: { type: Schema.Types.ObjectId },
     user_id: { type: Schema.Types.ObjectId, required: true },
+    workspace_id: { type: Schema.Types.ObjectId, required: true },
+    projectType: { type: String, default: "map" },
     date: { type: Date },
     title: {
         parentKey: { type: String },
@@ -44,7 +46,9 @@ var ProjectSchema = new Schema({
     created_at: { type: Date },
     updated_at: { type: Date },
     map: { type: Object },
-    isTask: { type: Boolean }
+    roadmap: { type: Object },
+    isTask: { type: Boolean },
+    offsetForTz: { type: Number }
 })
 
 //Export model

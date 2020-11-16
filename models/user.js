@@ -10,7 +10,8 @@ var UserSchema = new Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     createdAt: { type: Date },
-    updatedAt: { type: Date }
+    updatedAt: { type: Date },
+    offsetForTz: { type: Number }
 })
 
 UserSchema.pre('save', function (next) {

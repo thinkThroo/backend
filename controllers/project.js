@@ -1,4 +1,5 @@
 const Project = require("../models/project");
+const Wiki = require("../models/wiki");
 const commonResponse = require('../utils/common-response');
 const mongoose = require("mongoose");
 const projectHelpers = require("../utils/project");
@@ -14,8 +15,11 @@ exports.create_project = function (req, res) {
     let data = req.body;
     let {
         user_id,
+        workspace_id,
         project_id
-    } = req.params
+    } = req.params;
+    data.user_id = user_id;
+    data.workspace_id = workspace_id;
     console.log("about to create project with this data:", data, "if this is a task, check that is Topic is set true");
     data.created_at = new Date();
     const project = new Project(data);
@@ -71,7 +75,7 @@ exports.create_project = function (req, res) {
             } else {
                 debugger;
                 successRes.msg = "Successfully created task";
-                res.status(200).json({ ...successRes, _id: saveRes._id });
+                res.status(200).json({ ...successRes, _id: saveRes._id, ...data });
             }
         }
     });
@@ -82,13 +86,14 @@ exports.update_project = function (req, res) {
     // TODO: ADD MORE CONSTRAINTS ONCE ALL THE FEATURES ARE ADDED, including null check
     let {
         user_id,
+        workspace_id,
         project_id
     } = req.params;
     let data = req.body;
     data.updated_at = new Date();
     let updatedData = projectHelpers.getUpdateData(data);
-    // console.log("data in updateporject function", data, "check what is value of isTask property");
-    Project.updateOne({ _id: project_id, user_id: user_id }, { $set: updatedData }, function (err, result) {
+    console.log("updatedData in update_project function", updatedData);
+    Project.updateOne({ _id: project_id, user_id: user_id, workspace_id: workspace_id }, { $set: updatedData }, function (err, result) {
         if (err) {
             console.log("err", err);
             let responseMsg = "Error updating project, please try again.";
@@ -99,7 +104,7 @@ exports.update_project = function (req, res) {
             failureRes.msg = responseMsg;
             res.status(500).json(failureRes);
         } else {
-            successRes.msg = "Successfully updated task";
+            successRes.msg = "Successfully updated project";
             // console.log("update project re sult::", result);
             res.status(200).json({ ...successRes, _id: result._id });
         }
@@ -108,9 +113,30 @@ exports.update_project = function (req, res) {
 
 //  get list of tasks created
 exports.get_list = function (req, res) {
-    let user_id = req.params.user_id;
+    let {
+            user_id,
+            workspace_id
+    } = req.params;
     // console.log("inside get_list api")
-    Project.find({ user_id: user_id, isTask: false }).exec(function (err, result) {
+    Wiki.find({ user_id: user_id, _id: workspace_id }).exec(function (err, ws_result) {
+        // console.log("founnd list:", result);
+        if (err) throw err;
+        Project.find({ user_id: user_id, workspace_id: workspace_id }).exec(function (err, result) {
+            // console.log("founnd list:", result);
+            if (err) throw err;
+            res.status(200).json({ ...successRes, list: result, workspace: ws_result });
+        });
+    });
+}
+
+// get a project based on workspace_id, project_id for a given user_id
+exports.get_project = function (req, res) {
+    let {
+        user_id,
+        workspace_id,
+        project_id
+    } = req.params;
+    Project.find({ user_id: user_id, workspace_id: workspace_id, _id: project_id }).exec(function (err, result) {
         // console.log("founnd list:", result);
         if (err) throw err;
         res.status(200).json({ ...successRes, list: result });
@@ -120,12 +146,14 @@ exports.get_list = function (req, res) {
 exports.delete_project = function (req, res) {
     let {
         user_id,
-        project_id
+        project_id,
+        workspace_id
     } = req.params
     console.log("user_id, project_id in delete api", user_id, project_id);
     Project.remove({
         _id: project_id,
-        user_id: user_id
+        user_id: user_id,
+        workspace_id: workspace_id
     }, function (err, result) {
         console.log("result:", result);
         if (err) throw err;
