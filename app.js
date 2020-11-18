@@ -60,6 +60,13 @@ app.use('/api/project', projectRouter);
 app.use('/api/reminders', reminders);
 app.use('/api/workspace', wikiRouter);
 
+//Serve Static Assets in production 
+//set static folder
+app.use(express.static("client/build"));
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+});
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
